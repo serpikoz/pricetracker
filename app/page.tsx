@@ -2,8 +2,11 @@ import HeroCarousel from "@/components/HeroCarousel";
 import Searcbar from "@/components/Searcbar";
 import Image from "next/image";
 import React from "react";
+import { getAllProduct } from "@/lib/actions";
+import ProductCard from "@/components/ProductCard";
+const Home = async () => {
+  const allProduct = await getAllProduct();
 
-const Home = () => {
   return (
     <div>
       <>
@@ -20,8 +23,8 @@ const Home = () => {
                 />
               </p>
               <h1 className="head-text">
-                Unleash Power of{" "}
-                <span className="text-primary">Price Wise</span>
+                Unleash Power of
+                <span className="text-primary"> Price Wise</span>
               </h1>
               <p className="mt-6">
                 Powerful, self-serve product and growth analytics to help you
@@ -35,8 +38,8 @@ const Home = () => {
         <section className="trending-section">
           <h2 className="section-text">Trending</h2>
           <div className="flex flex-wrap gap-x-8 gap-y-16">
-            {["Apple Iphone 15", "Book", "Sneakers"].map((product) => (
-              <div>{product}</div>
+            {allProduct?.map((product) => (
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </section>
