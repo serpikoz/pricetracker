@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { connect } from "http2";
 import { scrapeAmazonProduct } from "../scraper";
 import { connectToDB } from "../mongoose";
+import { User } from "@/types";
 import Product from "../models/product.model";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
+import { generateEmailBody, sendEmail } from "../nodeemailer";
 
 export async function scrapeAndStoreProduct(productUrl: string) {
   if (!productUrl) return;
@@ -84,6 +86,31 @@ export async function getSimilarProducts(productId: string) {
     }).limit(3);
 
     return similarProducts;
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function addUserEmailtoProduct(
+  productId: string,
+  userEmail: string
+) {
+  try {
+    //Send our e mail
+
+    const product = await Product.findById(productId);
+    if (!product) return;
+
+    const userExist = product.users.some(
+      (user: User) => user.email === userEmail
+    );
+    if (!userExist) {
+      product.users.push({ email: userEmail });
+
+      await product.save();
+
+      const emailContent = await generateEmailBody(product, "WELCOME");
+      await sendEmail(emailContent, [userEmail]);
+    }
   } catch (error) {
     console.log(error);
   }
